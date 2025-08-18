@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>RPL Candidate Workspace — Standalone Demo</title>
+<style>
+  :root{ --bg:#f6f7fb; --text:#0f172a; --muted:#64748b; --card:#fff; --bord:#e2e8f0; --accent:#1f2a52; --ok:#19a974; --warn:#ffb703; --bad:#e63946 }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+  .container{max-width:1200px;margin:0 auto;padding:16px}
+  .header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);border-bottom:1px solid var(--bord)}
+  .header .bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px}
+  .pill{display:inline-flex;align-items:center;border:1px solid #f1c40f;background:#fff7e0;color:#7a5400;border-radius:999px;padding:2px 8px;font-size:12px}
+  .btn{border:1px solid var(--bord);background:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ghost{background:transparent}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+  @media(min-width:1200px){.grid{grid-template-columns:2fr 1fr}}
+  .card{background:var(--card);border:1px solid var(--bord);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.05);overflow:hidden}
+  .section{padding:12px 14px;border-top:1px solid var(--bord)}
+  .section:first-child{border-top:none}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{border:1px solid var(--bord);background:#fff;border-radius:12px;padding:8px 12px;cursor:pointer}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .hidden{display:none}
+  .between{display:flex;justify-content:space-between;align-items:center}
+  .row{padding:10px;border:1px solid var(--bord);border-radius:12px;background:#f8fafc;margin-bottom:8px}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--bord);border-radius:999px;font-size:12px}
+  .ok{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
+  .mid{background:#fffbeb;border-color:#fcd34d;color:#92400e}
+  .no{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
+  .progress{height:10px;background:#e2e8f0;border-radius:999px;overflow:hidden}
+  .progress>div{height:100%;background:var(--accent);width:0;transition:width .3s ease}
+  .small{font-size:12px;color:var(--muted)}
+  .upload-list{display:grid;gap:8px;margin-top:8px}
+  .upload-btn{border:1px solid var(--bord);padding:8px;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:13px;text-align:left}
+  .fade{animation:fadeIn .25s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .upload-doc-btn{margin-top:8px;display:inline-block;padding:8px 12px;border:1px dashed var(--accent);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:var(--accent)}
+  /* Simple modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal{background:#fff;border:1px solid var(--bord);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.15);width:560px;max-width:95vw}
+  .modal .head{padding:12px 14px;border-bottom:1px solid var(--bord);font-weight:600}
+  .modal .body{padding:12px 14px;display:grid;gap:10px}
+  .modal .foot{padding:12px 14px;border-top:1px solid var(--bord);display:flex;gap:8px;justify-content:flex-end}
+  /* Forms */
+  .form-grid{display:grid;gap:10px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .field input,.field textarea,.field select{width:100%;padding:8px 10px;border:1px solid var(--bord);border-radius:10px;background:#fff}
+  .field textarea{min-height:96px}
+  .actions{display:flex;gap:8px;justify-content:flex-end}
+  /* Chat styles */
+  .chatbox{display:flex;flex-direction:column;height:420px;border:1px solid var(--bord);border-radius:12px;background:#fff;overflow:hidden}
+  .chatlog{flex:1;overflow:auto;padding:12px;background:#f8fafc}
+  .msg{max-width:78%;padding:10px 12px;border-radius:12px;margin:6px 0;line-height:1.4}
+  .msg.bot{background:#e6eef8;border:1px solid #d0d9e6}
+  .msg.user{background:#ffffff;border:1px solid var(--bord);margin-left:auto}
+  .chatinput{display:flex;gap:8px;border-top:1px solid var(--bord);padding:8px;background:#fff}
+  .chatinput input{flex:1;padding:10px;border:1px solid var(--bord);border-radius:10px}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="bar container">
+    <div>
+      <div style="font-weight:600;font-size:18px">RPL Candidate Workspace (Standalone)</div>
+      <div style="color:var(--muted);font-size:13px">Candidate: <strong>Alex Nguyen</strong> • Qualification: <strong>TAE40122</strong> • Pathway: <span class="pill">Recognition of Prior Learning</span></div>
+    </div>
+    <div style="display:flex;gap:24px;align-items:center">
+      <div style="min-width:200px">
+        <div class="small" style="margin-bottom:4px;font-weight:600">Evidence map</div>
+        <div class="progress"><div id="headerEvidenceBar"></div></div>
+        <div class="small" id="headerEvidencePct">0% coverage</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="assessBadge" class="pill" style="display:none">Assessment added</span>
+        <button class="btn" id="uploadAssessBtn">Upload assessment to map</button>
+        <button class="btn ghost" onclick="alert('Saved draft (demo)')">Save draft</button>
+        <button id="submitTop" class="btn primary" disabled>Complete checklist to submit</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="grid">
+    <section>
+      <div class="card" style="margin-top:16px">
+        <div class="section between">
+          <div style="font-weight:600">Evidence uploads</div>
+          <div class="small">Choose what to provide</div>
+        </div>
+
+        <!-- Upload Assessment Document Button -->
+        <div class="section">
+          <label for="assessmentUpload" class="upload-doc-btn">📎 Upload Assessment Document</label>
+          <input type="file" id="assessmentUpload" style="display:none" onchange="handleAssessmentUpload(event)"/>
+        </div>
+
+        <!-- Tabs -->
+        <div class="section">
+          <div class="tabs" role="tablist" aria-label="Evidence tabs">
+            <button class="tab active" role="tab" data-tab="all">All evidence</button>
+            <button class="tab" role="tab" data-tab="videos">Videos</button>
+            <button class="tab" role="tab" data-tab="docs">Documents & Images</button>
+            <button class="tab" role="tab" data-tab="reports">Third-party reports</button>
+            <button class="tab" role="tab" data-tab="voluntary">Voluntary roles</button>
+            <button class="tab" role="tab" data-tab="experience">Experience</button>
+            <button class="tab" role="tab" data-tab="qualities">Core Qualities</button>
+          </div>
+        </div>
+
+        <!-- Panels -->
+        <div class="section">
+          <div id="tab-all" class="upload-list" role="tabpanel">
+            <div class="upload-btn">Formal Education & Training Records</div>
+            <div class="upload-btn">Informal Learning Experiences</div>
+            <div class="upload-btn">Professional Development Courses</div>
+            <div class="upload-btn">Licenses & Certifications</div>
+            <div class="upload-btn">Portfolio of Evidence (e.g. photos, work instructions)</div>
+            <div class="upload-btn">References & Recommendations</div>
+            <div class="upload-btn">Performance Appraisals</div>
+            <div class="upload-btn">Volunteer Work</div>
+            <div class="upload-btn">Case Studies / Project Summaries</div>
+            <div class="upload-btn">Workplace Documentation (WHS, SWMS, MSDS, JSA)</div>
+          </div>
+
+          <div id="tab-videos" class="upload-list hidden" role="tabpanel">
+            <div class="upload-btn">Interview with Supervisor <div class="transcript">Transcript available after upload</div></div>
+            <div class="upload-btn">On the Job Experience <div class="transcript">Transcript available after upload</div></div>
+            <div class="upload-btn">Client Feedback <div class="transcript">Transcript available after upload</div></div>
+            <div class="upload-btn">Industry / WHS Meeting <div class="transcript">Transcript available after upload</div></div>
+            <div class="small" style="margin-top:8px">Uploaded videos (demo)</div>
+            <div id="videoUploads" style="display:grid;gap:8px"></div>
+          </div>
+
+          <div id="tab-docs" class="upload-list hidden" role="tabpanel">
+            <div class="upload-btn">Certificates</div>
+            <div class="upload-btn">Licenses</div>
+            <div class="upload-btn">Awards</div>
+            <div class="upload-btn">Referrals</div>
+          </div>
+
+          <div id="tab-reports" class="upload-list hidden" role="tabpanel">
+            <div class="upload-btn">Third-party Report from Employer</div>
+            <div class="upload-btn">Signed Supervisor Statement</div>
+            <div class="upload-btn">Reference Letter</div>
+          </div>
+
+          <!-- Voluntary roles -->
+          <div id="tab-voluntary" class="upload-list hidden" role="tabpanel">
+            <form id="volForm" class="form-grid">
+              <div class="field"><label>Volunteer role</label><input id="volRole" required></div>
+              <div class="field"><label>Organisation</label><input id="volOrg" required></div>
+              <div class="field"><label>Duration</label><input id="volDur" placeholder="e.g. Jan 2023 – Jun 2024" required></div>
+              <div class="field"><label>Job role / responsibilities</label><textarea id="volResp" required></textarea></div>
+              <div class="field"><label>Activities & experiences within this role</label><textarea id="volExp" required></textarea></div>
+              <div class="actions">
+                <button type="button" class="btn" id="volReset">Clear</button>
+                <button type="submit" class="btn primary">Submit & create PDF</button>
+              </div>
+            </form>
+            <div class="small">After submitting, you’ll be asked if you want to add another. A PDF will be added to your evidence.</div>
+            <div id="volEvidence" style="margin-top:10px"></div>
+          </div>
+
+          <!-- Experience (Reflection Coach) -->
+          <div id="tab-experience" class="upload-list hidden" role="tabpanel">
+            <div class="small" style="margin-bottom:6px">Reflection Coach — Feed-up • Feedback • Feed-forward</div>
+            <div class="chatbox">
+              <div id="chatlog" class="chatlog" aria-live="polite"></div>
+              <div class="chatinput">
+                <input id="chatInput" type="text" placeholder="Type your answer and press Enter..."/>
+                <button id="sendBtn" class="btn primary">Send</button>
+              </div>
+            </div>
+            <div class="small" style="margin-top:8px">When finished, a summary PDF will be generated and added to Documents.</div>
+            <div id="expEvidence" style="margin-top:10px"></div>
+          </div>
+
+          <!-- Core Qualities (coach) -->
+          <div id="tab-qualities" class="upload-list hidden" role="tabpanel">
+            <div class="small" style="margin-bottom:6px">Core Qualities Coach — strengths • evidence • next steps</div>
+            <div class="chatbox">
+              <div id="chatlogQ" class="chatlog" aria-live="polite"></div>
+              <div class="chatinput">
+                <input id="chatInputQ" type="text" placeholder="Type your answer and press Enter..."/>
+                <button id="sendBtnQ" class="btn primary">Send</button>
+              </div>
+            </div>
+            <div class="small" style="margin-top:8px">When finished, a summary PDF will be generated and added to Documents.</div>
+            <div id="qualEvidence" style="margin-top:10px"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <div class="section between">
+          <div style="font-weight:600">Evidence map</div>
+          <div class="small">Coverage across units</div>
+        </div>
+        <div class="section">
+          <div class="between" style="margin-bottom:6px">
+            <div class="small">Overall coverage</div>
+            <div class="small" id="evidenceOverallPct">0%</div>
+          </div>
+          <div class="progress"><div id="evidenceOverallBar"></div></div>
+        </div>
+        <div class="section small">Legend: <span class="chip ok">Met</span> <span class="chip mid">Partial</span> <span class="chip no">Not yet</span></div>
+      </div>
+
+      <!-- NEW: Overall AI feedback card -->
+      <div class="card" id="aiCard" style="margin-top:16px">
+        <div class="section between">
+          <div style="font-weight:600">Overall AI feedback</div>
+          <button class="btn" id="aiRefresh" title="Re-run analysis">Refresh</button>
+        </div>
+        <div class="section" id="aiSummary">
+          <div class="small">The AI analyses your evidence and mapping to estimate readiness for submission to an RTO.</div>
+          <div style="margin-top:8px">
+            <span id="aiStatus" class="chip mid">Analysing…</span>
+          </div>
+          <div id="aiText" class="small" style="margin-top:8px;white-space:pre-wrap"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Assessment upload modal -->
+  <div id="assessModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="assessTitle">
+    <div class="modal">
+      <div class="head" id="assessTitle">Add assessment document for mapping</div>
+      <div class="body">
+        <label class="small">Paste a link to your assessment document (Google Drive, OneDrive, etc.)</label>
+        <input id="assessLink" class="input" type="url" placeholder="https://..." />
+        <div class="small" style="text-align:center">— or —</div>
+        <label class="small">Upload a file</label>
+        <input id="assessFile" type="file" />
+      </div>
+      <div class="foot">
+        <button class="btn" id="assessCancel">Cancel</button>
+        <button class="btn primary" id="assessAdd">Add</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">RPL demo • AU English • Candidate view • No real data</footer>
+
+<script>
+// Evidence summary header demo
+(function(){
+  const pct = 36; // demo start value
+  const bar = document.getElementById('headerEvidenceBar');
+  const txt = document.getElementById('headerEvidencePct');
+  if(bar) bar.style.width = pct+'%';
+  if(txt) txt.textContent = pct+'% coverage';
+})();
+
+// Auto-transcript demo content
+const demoVideos = [
+  {id:'V-001', name:'Delivery clip (8m).mp4', duration:'8:02'},
+  {id:'V-002', name:'Supervisor interview (3m).mp4', duration:'3:11'}
+];
+function renderVideoUploads(){
+  const wrap = document.getElementById('videoUploads');
+  if(!wrap) return; wrap.innerHTML = '';
+  demoVideos.forEach(v=>{
+    const card = document.createElement('div'); card.className='row';
+    const transcriptText = `Auto-transcript for ${v.name}\n\n[00:00] Intro...\n[00:30] Task steps...\n[02:00] Safety / WHS...\n[End] Summary.`;
+    const blob = new Blob([transcriptText], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    card.innerHTML = `
+      <div class="between">
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="font-size:20px">🎬</div>
+          <div>
+            <div style="font-weight:600">${v.name}</div>
+            <div class="small">${v.duration} • auto-transcribed</div>
+          </div>
+        </div>
+        <a class="btn" style="padding:6px 10px" download="${v.name.replace(/\.[^.]+$/, '')}-transcript.txt" href="${url}">Download transcript</a>
+      </div>`;
+    wrap.appendChild(card);
+  });
+}
+
+// Modal controls for assessment upload (demo) + badge
+(function(){
+  const openBtn = document.getElementById('uploadAssessBtn');
+  const modal = document.getElementById('assessModal');
+  const cancelBtn = document.getElementById('assessCancel');
+  const addBtn = document.getElementById('assessAdd');
+  const badge = document.getElementById('assessBadge');
+  function show(){ modal.style.display='flex'; }
+  function hide(){ modal.style.display='none'; }
+  if(openBtn){ openBtn.addEventListener('click', show); }
+  if(cancelBtn){ cancelBtn.addEventListener('click', hide); }
+  if(addBtn){ addBtn.addEventListener('click', ()=>{ window.__assessmentAdded=true; if(badge){badge.style.display='inline-flex';} hide(); analyseEvidence(); }); }
+})();
+
+// Handle Assessment Upload (file input)
+function handleAssessmentUpload(e){
+  const file = e.target.files[0];
+  if(file){
+    window.__assessmentAdded = true;
+    const badge = document.getElementById('assessBadge');
+    if(badge) badge.style.display='inline-flex';
+    alert(`Uploaded assessment document: ${file.name}`);
+    analyseEvidence();
+  }
+}
+
+// Tab handler — includes 'experience' and 'qualities'
+(function(){
+  const tablist = document.querySelector('[role="tablist"]');
+  const ids = ['all','videos','docs','reports','voluntary','experience','qualities'];
+  function show(key){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    const btn = document.querySelector(`.tab[data-tab="${key}"]`); if(btn) btn.classList.add('active');
+    ids.forEach(id=>{
+      const panel = document.getElementById('tab-'+id);
+      if(panel) panel.style.display = (id===key)?'block':'none';
+    });
+    if(key==='videos') renderVideoUploads();
+    if(key==='experience' && !window.__coachStarted){ startCoach(); }
+    if(key==='qualities' && !window.__qualitiesStarted){ startQualitiesCoach(); }
+  }
+  if(tablist){
+    tablist.addEventListener('click', (e)=>{
+      const b = e.target.closest('.tab');
+      if(!b) return; e.preventDefault(); show(b.dataset.tab);
+    });
+  }
+  show('all');
+})();
+
+// --- Minimal PDF generator (no external libs) ---
+function simplePdfFromLines(title, lines){
+  function esc(s){return String(s).replace(/\(/g,'\\(').replace(/\)/g,'\\)');}
+  var EOL='\n';
+  var content = 'BT /F1 12 Tf 50 780 Td ('+esc(title)+') Tj'+EOL;
+  var y=760; for(var i=0;i<lines.length;i++){ content += 'BT /F1 10 Tf 50 '+y+' Td ('+esc(lines[i])+') Tj'+EOL; y-=14; }
+  var objs = [
+    '1 0 obj <</Type /Catalog /Pages 4 0 R>> endobj'+EOL,
+    '2 0 obj <</Length '+content.length+'>> stream'+EOL+content+'endstream endobj'+EOL,
+    '3 0 obj <</Type /Page /Parent 4 0 R /MediaBox [0 0 595 842] /Contents 2 0 R /Resources <</Font <</F1 5 0 R>>>>>> endobj'+EOL,
+    '4 0 obj <</Type /Pages /Kids [3 0 R] /Count 1>> endobj'+EOL,
+    '5 0 obj <</Type /Font /Subtype /Type1 /BaseFont /Helvetica>> endobj'+EOL
+  ];
+  var acc = ('%PDF-1.4'+EOL).length; var offs=['0000000000 65535 f '];
+  for(var j=0;j<objs.length;j++){ offs.push(String(acc).padStart(10,'0')+' 00000 n '); acc += objs[j].length; }
+  var xref = 'xref'+EOL+'0 '+offs.length+EOL+offs.join(EOL)+EOL;
+  var trailer = 'trailer <</Size '+offs.length+' /Root 1 0 R>>'+EOL+'startxref'+EOL+ (acc) +EOL+'%%EOF';
+  var pdf = '%PDF-1.4'+EOL+objs.join('')+xref+trailer;
+  return new Blob([pdf],{type:'application/pdf'});
+}
+
+// --- Voluntary roles: form -> PDF -> add to evidence ---
+(function(){
+  var f = document.getElementById('volForm'); if(!f) return;
+  var out = document.getElementById('volEvidence');
+  var resetBtn = document.getElementById('volReset'); 
+  if(resetBtn){ resetBtn.addEventListener('click', function(){ f.reset(); }); }
+
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var role = document.getElementById('volRole').value.trim();
+    var org  = document.getElementById('volOrg').value.trim();
+    var dur  = document.getElementById('volDur').value.trim();
+    var resp = document.getElementById('volResp').value.trim();
+    var exp  = document.getElementById('volExp').value.trim();
+    if(!role||!org||!dur||!resp||!exp){ alert('Please complete all fields.'); return; }
+
+    var title = 'Voluntary Role — '+role+' @ '+org;
+    var lines = ['Organisation: '+org,'Duration: '+dur,'','Responsibilities:',resp,'','Activities & experiences:',exp];
+    var blob = simplePdfFromLines(title, lines);
+    var url  = URL.createObjectURL(blob);
+    var name = role.replace(/\s+/g,'_')+'_'+org.replace(/\s+/g,'_')+'.pdf';
+
+    var row = document.createElement('div'); row.className='row';
+    row.innerHTML = '<div class="between"><div><div style="font-weight:600">'+title+'</div><div class="small">PDF generated • Voluntary roles</div></div><a class="btn" download="'+name+'" href="'+url+'">Download PDF</a></div>';
+    out.prepend(row);
+
+    var docs = document.getElementById('tab-docs'); 
+    if(docs){ 
+      var r=document.createElement('div'); r.className='row'; 
+      r.innerHTML='<div class="between"><div><div style="font-weight:600">'+title+'</div><div class="small">Evidence: Voluntary role</div></div><a class="btn" download="'+name+'" href="'+url+'">Download</a></div>'; 
+      docs.prepend(r); 
+    }
+
+    setTimeout(function(){ if(confirm('Voluntary role saved. Do you want to submit another?')) f.reset(); }, 50);
+    analyseEvidence();
+  });
+})();
+
+// --- Experience: Reflection Coach (guided chat -> summary PDF) ---
+function startCoach(){
+  window.__coachStarted = true;
+  const log = document.getElementById('chatlog');
+  const input = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const docs = document.getElementById('tab-docs');
+  const expEvidence = document.getElementById('expEvidence');
+
+  const Q = [
+    {key:'goal', phase:'FEED-UP', text:'What was a goal you set for yourself?'},
+    {key:'goal_why', phase:'FEED-UP', text:'Why was this goal important to you and what would success look like?'},
+    {key:'actions', phase:'FEEDBACK', text:'What actions have you taken so far toward this goal?'},
+    {key:'went_well', phase:'FEEDBACK', text:'What went well? What strengths did you use?'},
+    {key:'challenges', phase:'FEEDBACK', text:'What was challenging or didn\'t work? What did you learn from it?'},
+    {key:'next_step', phase:'FEED-FORWARD', text:'What\'s the next step you\'ll take to move closer to your goal?'},
+    {key:'support', phase:'FEED-FORWARD', text:'What support, resources, or strategies will you use?'},
+    {key:'timeline', phase:'FEED-FORWARD', text:'By when will you complete the next step?'}
+  ];
+
+  const A = {}; // answers
+
+  function addMsg(text, who){
+    const div = document.createElement('div');
+    div.className = 'msg ' + (who||'bot');
+    div.textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function feedbackNote(){
+    const positives = [];
+    if(A.went_well) positives.push('You highlighted things that went well — keep doing those deliberately.');
+    if(A.actions) positives.push('The actions you listed show commitment and initiative.');
+    const gaps = [];
+    if(A.challenges) gaps.push('Tackle challenges by choosing one small constraint to remove or a skill to practise.');
+    if(!A.support) gaps.push('Line up one support or resource you can use this week.');
+    const tips = [
+      'Write your next step as a 10–15 minute task to make it hard to avoid.',
+      'Share your goal with a peer/coach to increase follow-through.',
+      'Capture evidence (notes, photos, files) as you go to support your RPL mapping.'
+    ];
+    let txt = 'Quick coaching notes — \n';
+    if(positives.length){ txt += '• Strengths: ' + positives.join(' ') + '\n'; }
+    if(gaps.length){ txt += '• Opportunities: ' + gaps.join(' ') + '\n'; }
+    txt += '• Tips: ' + tips[0];
+    return txt;
+  }
+
+  function summariseAndSave(){
+    const lines = [
+      'Reflection Summary (Feed-up • Feedback • Feed-forward)',
+      '',
+      'Goal: ' + (A.goal||''),
+      'Importance / Success: ' + (A.goal_why||''),
+      'Actions so far: ' + (A.actions||''),
+      'What went well: ' + (A.went_well||''),
+      'Challenges / lessons: ' + (A.challenges||''),
+      'Next step: ' + (A.next_step||''),
+      'Support/resources: ' + (A.support||''),
+      'Timeline: ' + (A.timeline||''),
+      '',
+      'Coach notes:',
+      feedbackNote()
+    ];
+    const title = 'Experience Reflection — Summary';
+    const blob = simplePdfFromLines(title, lines);
+    const url  = URL.createObjectURL(blob);
+    const name = 'reflection_summary.pdf';
+
+    const row = document.createElement('div'); row.className='row';
+    row.innerHTML = '<div class="between"><div><div style="font-weight:600">'+title+'</div><div class="small">PDF generated • Experience</div></div><a class="btn" download="'+name+'" href="'+url+'">Download PDF</a></div>';
+    expEvidence.prepend(row);
+
+    if(docs){
+      const r = document.createElement('div'); r.className='row';
+      r.innerHTML = '<div class="between"><div><div style="font-weight:600">'+title+'</div><div class="small">Evidence: Experience reflection</div></div><a class="btn" download="'+name+'" href="'+url+'">Download</a></div>';
+      docs.prepend(r);
+    }
+
+    addMsg('Thanks — I\'ve created your summary. You can download the PDF above and it\'s been added to Documents.', 'bot');
+    analyseEvidence();
+  }
+
+  let i = 0;
+  function ask(){
+    if(i < Q.length){
+      const q = Q[i];
+      addMsg(q.phase + ' • ' + q.text, 'bot');
+    } else {
+      addMsg('Great reflection. Here\'s a brief, encouraging wrap‑up and your summary PDF.', 'bot');
+      summariseAndSave();
+      input.disabled = true; sendBtn.disabled = true;
+    }
+  }
+
+  function handle(answer){
+    if(i < Q.length){
+      const key = Q[i].key; A[key] = answer.trim();
+      if(answer.trim().length){
+        addMsg('Nice — thanks for sharing. I\'ll keep that in your summary.', 'bot');
+      } else {
+        addMsg('No worries — I\'ll leave that part blank. You can update it later.', 'bot');
+      }
+      i++; ask();
+    }
+  }
+
+  sendBtn.addEventListener('click', ()=>{ const val = input.value; if(!val) return; addMsg(val, 'user'); input.value=''; handle(val); });
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); }});
+
+  addMsg('Hi! I\'m your Reflection Coach. Let\'s use Feed‑up, Feedback, and Feed‑forward to reflect on your experience. I\'ll ask one question at a time.', 'bot');
+  ask();
+}
+
+// --- Core Qualities Coach ---
+function startQualitiesCoach(){
+  window.__qualitiesStarted = true;
+  const log = document.getElementById('chatlogQ');
+  const input = document.getElementById('chatInputQ');
+  const sendBtn = document.getElementById('sendBtnQ');
+  const docs = document.getElementById('tab-docs');
+  const qualEvidence = document.getElementById('qualEvidence');
+
+  const Q = [
+    {key:'top_quality', phase:'STRENGTH', text:'Which core quality best describes you right now? (e.g., communication, teamwork, initiative, problem‑solving)'} ,
+    {key:'example', phase:'EVIDENCE', text:'Describe a specific example where you demonstrated this quality.'},
+    {key:'impact', phase:'EVIDENCE', text:'What positive impact did this have on others, the task, or outcomes?'},
+    {key:'grow', phase:'GROWTH', text:'Which quality would you most like to develop further, and why?'},
+    {key:'plan', phase:'FEED‑FORWARD', text:'What will you do in the next two weeks to grow this quality?'},
+    {key:'date', phase:'FEED‑FORWARD', text:'By when will you complete this action?'}
+  ];
+
+  const A = {};
+
+  function addMsg(text, who){
+    const div = document.createElement('div');
+    div.className = 'msg ' + (who||'bot');
+    div.textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function summariseAndSave(){
+    const lines = [
+      'Core Qualities Reflection — Summary',
+      '',
+      'Top quality: ' + (A.top_quality||''),
+      'Example: ' + (A.example||''),
+      'Impact: ' + (A.impact||''),
+      'Growth focus: ' + (A.grow||''),
+      'Next action: ' + (A.plan||''),
+      'Timeline: ' + (A.date||'')
+    ];
+    const title = 'Core Qualities — Summary';
+    const blob = simplePdfFromLines(title, lines);
+    const url  = URL.createObjectURL(blob);
+    const name = 'core_qualities_summary.pdf';
+
+    const row = document.createElement('div'); row.className='row';
+    row.innerHTML = '<div class="between"><div><div style="font-weight:600">'+title+'</div><div class="small">PDF generated • Core Qualities</div></div><a class="btn" download="'+name+'" href="'+url+'">Download PDF</a></div>';
+    qualEvidence.prepend(row);
+
+    if(docs){
+      const r = document.createElement('div'); r.className='row';
+      r.innerHTML = '<div class="between"><div><div style="font-weight:600">'+title+'</div><div class="small">Evidence: Core Qualities reflection</div></div><a class="btn" download="'+name+'" href="'+url+'">Download</a></div>';
+      docs.prepend(r);
+    }
+
+    addMsg('Done — your Core Qualities summary is ready above and added to Documents.', 'bot');
+    analyseEvidence();
+  }
+
+  let i = 0;
+  function ask(){
+    if(i < Q.length){
+      const q = Q[i];
+      addMsg(q.phase + ' • ' + q.text, 'bot');
+    } else {
+      addMsg('Great work reflecting on your strengths. I\'ve created your summary PDF.', 'bot');
+      summariseAndSave();
+      input.disabled = true; sendBtn.disabled = true;
+    }
+  }
+
+  function handle(answer){
+    if(i < Q.length){
+      const key = Q[i].key; A[key] = answer.trim();
+      if(answer.trim().length){ addMsg('Got it — saving that to your summary.', 'bot'); }
+      else { addMsg('No problem — skipping this one.', 'bot'); }
+      i++; ask();
+    }
+  }
+
+  sendBtn.addEventListener('click', ()=>{ const val = input.value; if(!val) return; addMsg(val, 'user'); input.value=''; handle(val); });
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); }});
+
+  addMsg('Hi! I\'m your Core Qualities Coach. We\'ll capture strengths, real examples, and a short growth plan. One question at a time.', 'bot');
+  ask();
+}
+
+// ---- NEW: Evidence analysis & AI feedback (demo heuristic) ----
+function analyseEvidence(){
+  const docsCount = document.querySelectorAll('#tab-docs .row').length; // generated / added docs
+  const expCount = document.querySelectorAll('#expEvidence .row').length; // experience pdfs
+  const qualCount = document.querySelectorAll('#qualEvidence .row').length; // qualities pdfs
+  const volCount = document.querySelectorAll('#volEvidence .row').length; // voluntary pdfs
+  const videoCount = (document.querySelectorAll('#videoUploads > div').length || 0) + (Array.isArray(demoVideos)?demoVideos.length:0);
+  const assessment = !!window.__assessmentAdded;
+
+  // Heuristic score out of 100
+  let score = 0;
+  if(assessment) score += 30; else score += 10; // assessment mapping is important
+  score += Math.min(40, docsCount * 10); // docs, caps at 4 docs
+  if(expCount) score += 15;
+  if(qualCount) score += 5;
+  if(volCount) score += 5;
+  if(videoCount) score += 5;
+  score = Math.max(0, Math.min(100, score));
+
+  // Update side progress as "overall coverage"
+  const pct = score; // reuse as coverage proxy for demo
+  const pctBar = document.getElementById('evidenceOverallBar');
+  const pctTxt = document.getElementById('evidenceOverallPct');
+  if(pctBar) pctBar.style.width = pct + '%';
+  if(pctTxt) pctTxt.textContent = pct + '%';
+
+  // Compose feedback
+  let status='mid', statusLabel='Almost ready';
+  if(score >= 75){ status='ok'; statusLabel='Likely ready'; }
+  else if(score < 50){ status='no'; statusLabel='Not ready yet'; }
+
+  const gaps = [];
+  if(!assessment) gaps.push('Upload your **assessment/mapping document** so we can align evidence to units.');
+  if(docsCount < 2) gaps.push('Add **at least two documents** (certificates, workplace docs, or generated summaries).');
+  if(!expCount) gaps.push('Complete one **Experience reflection** to capture context and outcomes.');
+  if(!volCount) gaps.push('If relevant, record **voluntary roles** — these strengthen breadth.');
+  if(!videoCount) gaps.push('Optional: include a **short video** or supervisor interview for richer evidence.');
+
+  const strengths = [];
+  if(docsCount >= 2) strengths.push('Good mix of documentary evidence.');
+  if(expCount) strengths.push('Experience reflection captured.');
+  if(qualCount) strengths.push('Core qualities reflection added.');
+  if(volCount) strengths.push('Voluntary role documented.');
+
+  const aiStatus = document.getElementById('aiStatus');
+  const aiText = document.getElementById('aiText');
+  if(aiStatus){ aiStatus.className = 'chip ' + (status==='ok'?'ok':status==='no'?'no':'mid'); aiStatus.textContent = statusLabel; }
+
+  const tips = [
+    'Aim for **sufficiency**: multiple pieces across units, not just one artifact.',
+    'Demonstrate **currency**: include evidence from the last 2–3 years where possible.',
+    'Ensure **authenticity**: sign/attest third‑party reports and include contactable referees.'
+  ];
+
+  const summary = `Readiness score: ${score}/100\n\nStrengths:\n• ${ (strengths.length? strengths.join('\n• '): '—') }\n\nGaps to address:\n• ${ (gaps.length? gaps.join('\n• '): 'None — you look good to submit.') }\n\nTips:\n• ${tips.join('\n• ')}`;
+  if(aiText) aiText.textContent = summary;
+}
+
+document.getElementById('aiRefresh')?.addEventListener('click', analyseEvidence);
+
+// Kick off an initial analysis after load
+window.addEventListener('load', analyseEvidence);
+</script>
+</body>
+</html>
+
+
