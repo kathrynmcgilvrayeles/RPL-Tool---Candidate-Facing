@@ -178,6 +178,28 @@
             <div class="small" style="margin-top:8px">When finished, a summary PDF will be generated and added to Documents.</div>
             <div id="expEvidence" style="margin-top:10px"></div>
           </div>
+          <!-- Reasoning Card -->
+<div class="card" id="reasoningCard" style="margin-top:16px">
+  <div class="section between">
+    <div style="font-weight:600">Reasoning</div>
+  </div>
+  <div class="section" id="reasoningSummary">
+    <div class="small">How the AI made its decision:</div>
+    <div class="grid" style="margin-top:8px">
+      <div><strong>Assessment uploaded:</strong> +30 points</div>
+      <div><strong>Documents added:</strong> +10 points each (max 4)</div>
+      <div><strong>Experience reflection:</strong> +15 points</div>
+      <div><strong>Voluntary roles:</strong> +5 points</div>
+      <div><strong>Core qualities:</strong> +5 points</div>
+      <div><strong>Videos:</strong> +5 points</div>
+      <div><strong>Base score:</strong> 10 points if no assessment uploaded</div>
+      <div class="small" style="grid-column:1/-1;margin-top:8px">
+        The final readiness score is the sum of these, capped at 100. Status is set by score: <br>
+        <strong>Likely ready</strong> (75+), <strong>Almost ready</strong> (50-74), <strong>Not ready yet</strong> (&lt;50).
+      </div>
+    </div>
+  </div>
+</div>
 
           <!-- Core Qualities (coach) -->
           <div id="tab-qualities" class="upload-list hidden" role="tabpanel">
@@ -694,6 +716,7 @@ document.getElementById('runAnalysisBtn')?.addEventListener('click', function() 
 </script>
 </body>
 </html>
+
 
 
 
