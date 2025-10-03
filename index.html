@@ -79,6 +79,7 @@
         <button class="btn" id="uploadAssessBtn">Upload assessment to map</button>
         <button class="btn ghost" onclick="alert('Saved draft (demo)')">Save draft</button>
         <button id="submitTop" class="btn primary" disabled>Complete checklist to submit</button>
+        <button id="runAnalysisBtn" class="btn" style="background:#e2e8f0;color:var(--accent)">Run Analysis</button>
       </div>
     </div>
   </div>
@@ -662,8 +663,14 @@ document.getElementById('aiRefresh')?.addEventListener('click', analyseEvidence)
 
 // Kick off an initial analysis after load
 window.addEventListener('load', analyseEvidence);
+  // Run Analysis button handler
+document.getElementById('runAnalysisBtn')?.addEventListener('click', function() {
+  analyseEvidence();
+  document.getElementById('aiCard')?.scrollIntoView({behavior:"smooth"});
+});
 </script>
 </body>
 </html>
+
 
 
