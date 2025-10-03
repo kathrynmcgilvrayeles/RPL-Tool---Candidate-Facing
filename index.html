@@ -272,33 +272,7 @@
   if(txt) txt.textContent = pct+'% coverage';
 })();
 
-// Auto-transcript demo content
-const demoVideos = [
-  {id:'V-001', name:'Delivery clip (8m).mp4', duration:'8:02'},
-  {id:'V-002', name:'Supervisor interview (3m).mp4', duration:'3:11'}
-];
-function renderVideoUploads(){
-  const wrap = document.getElementById('videoUploads');
-  if(!wrap) return; wrap.innerHTML = '';
-  demoVideos.forEach(v=>{
-    const card = document.createElement('div'); card.className='row';
-    const transcriptText = `Auto-transcript for ${v.name}\n\n[00:00] Intro...\n[00:30] Task steps...\n[02:00] Safety / WHS...\n[End] Summary.`;
-    const blob = new Blob([transcriptText], {type:'text/plain'});
-    const url = URL.createObjectURL(blob);
-    card.innerHTML = `
-      <div class="between">
-        <div style="display:flex;gap:8px;align-items:center">
-          <div style="font-size:20px">🎬</div>
-          <div>
-            <div style="font-weight:600">${v.name}</div>
-            <div class="small">${v.duration} • auto-transcribed</div>
-          </div>
-        </div>
-        <a class="btn" style="padding:6px 10px" download="${v.name.replace(/\.[^.]+$/, '')}-transcript.txt" href="${url}">Download transcript</a>
-      </div>`;
-    wrap.appendChild(card);
-  });
-}
+
 
 // Modal controls for assessment upload (demo) + badge
 (function(){
@@ -735,9 +709,43 @@ function downloadReasoningPDF() {
 
 document.getElementById('downloadReasoningPDFBtn')?.addEventListener('click', downloadReasoningPDF);
 window.addEventListener('load', renderReasoningComments);
+  <!-- Videos Panel with four sub-tabs and transcript simulation -->
+<div id="tab-videos" class="upload-list hidden" role="tabpanel">
+  <div class="card" style="margin-top:0">
+    <div class="section">
+      <div class="tabs-video" id="videoTabs">
+        <button class="tab-video active" data-tab="interview">Interview with Supervisor</button>
+        <button class="tab-video" data-tab="onjob">On the Job Experience</button>
+        <button class="tab-video" data-tab="client">Client Feedback</button>
+        <button class="tab-video" data-tab="industry">Industry / WHS Meeting</button>
+      </div>
+      <div class="panel-video active" id="panel-interview">
+        <label for="uploadInterview" class="upload-doc-btn">📹 Upload Interview Video</label>
+        <input type="file" id="uploadInterview" accept="video/*" style="display:none" />
+        <div id="listInterview"></div>
+      </div>
+      <div class="panel-video" id="panel-onjob">
+        <label for="uploadOnJob" class="upload-doc-btn">📹 Upload On the Job Video</label>
+        <input type="file" id="uploadOnJob" accept="video/*" style="display:none" />
+        <div id="listOnJob"></div>
+      </div>
+      <div class="panel-video" id="panel-client">
+        <label for="uploadClient" class="upload-doc-btn">📹 Upload Client Feedback Video</label>
+        <input type="file" id="uploadClient" accept="video/*" style="display:none" />
+        <div id="listClient"></div>
+      </div>
+      <div class="panel-video" id="panel-industry">
+        <label for="uploadIndustry" class="upload-doc-btn">📹 Upload Industry/WHS Meeting Video</label>
+        <input type="file" id="uploadIndustry" accept="video/*" style="display:none" />
+        <div id="listIndustry"></div>
+      </div>
+    </div>
+  </div>
+</div>
 </script>
 </body>
 </html>
+
 
 
 
