@@ -666,9 +666,35 @@ document.getElementById('runAnalysisBtn')?.addEventListener('click', function() 
   analyseEvidence();
   document.getElementById('aiCard')?.scrollIntoView({behavior:"smooth"});
 });
+  // Candidate Name Save/Load
+(function() {
+  const input = document.getElementById('candidateNameInput');
+  const saveBtn = document.getElementById('saveCandidateNameBtn');
+  const savedMsg = document.getElementById('candidateNameSaved');
+
+  // Load existing name from localStorage
+  const storedName = localStorage.getItem('candidateName');
+  if (storedName && input) input.value = storedName;
+
+  function saveName() {
+    if (input && input.value.trim()) {
+      localStorage.setItem('candidateName', input.value.trim());
+      if (savedMsg) {
+        savedMsg.style.display = 'inline';
+        setTimeout(() => { savedMsg.style.display = 'none'; }, 1200);
+      }
+    }
+  }
+
+  if (saveBtn) saveBtn.addEventListener('click', saveName);
+  if (input) input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') saveName();
+  });
+})();
 </script>
 </body>
 </html>
+
 
 
 
