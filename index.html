@@ -178,31 +178,7 @@
             <div class="small" style="margin-top:8px">When finished, a summary PDF will be generated and added to Documents.</div>
             <div id="expEvidence" style="margin-top:10px"></div>
           </div>
-          <!-- Reasoning Card -->
-<div class="card" id="reasoningCard" style="margin-top:16px">
-  <div class="section between">
-    <div style="font-weight:600">Reasoning</div>
-    <button class="btn" id="downloadReasoningPDFBtn">Download PDF</button>
-  </div>
-  <div class="section" id="reasoningTableWrap">
-    <div class="small">AI comments on Validity, Sufficiency, Authenticity, Currency for each evidence item:</div>
-    <table id="reasoningTable" style="width:100%;margin-top:8px;border-collapse:collapse;font-size:13px">
-      <thead>
-        <tr>
-          <th>Evidence</th>
-          <th>Validity</th>
-          <th>Sufficiency</th>
-          <th>Authenticity</th>
-          <th>Currency</th>
-          <th>Comments</th>
-        </tr>
-      </thead>
-      <tbody id="reasoningTableBody">
-        <!-- Rows will be dynamically populated -->
-      </tbody>
-    </table>
-  </div>
-</div>
+         
 
           <!-- Core Qualities (coach) -->
           <div id="tab-qualities" class="upload-list hidden" role="tabpanel">
@@ -237,6 +213,22 @@
         </div>
         <div class="section small">Legend: <span class="chip ok">Met</span> <span class="chip mid">Partial</span> <span class="chip no">Not yet</span></div>
       </div>
+      <div class="card" id="reasoningCard" style="margin-top:16px">
+  <div class="section between">
+    <div style="font-weight:600">Reasoning</div>
+    <button class="btn" id="downloadReasoningPDFBtn">Download PDF</button>
+  </div>
+  <div class="section" id="reasoningSummary">
+    <div class="small">How the AI arrived at its decision:</div>
+    <ul id="reasoningComments" style="margin-top:8px">
+      <li>The mapping includes a recent assessment document, covering all required units and demonstrating sufficiency.</li>
+      <li>Multiple sources of evidence were provided, which increases validity and authenticity.</li>
+      <li>Evidence is current and relevant, with recent workplace documentation.</li>
+      <li>Some gaps remain in workplace-specific examples; adding these would strengthen sufficiency.</li>
+      <li>Overall, the evidence meets the criteria for readiness for submission.</li>
+    </ul>
+  </div>
+</div>
 
       <!-- NEW: Overall AI feedback card -->
       <div class="card" id="aiCard" style="margin-top:16px">
@@ -716,9 +708,43 @@ document.getElementById('runAnalysisBtn')?.addEventListener('click', function() 
     if (e.key === 'Enter') saveName();
   });
 })();
+  // Render reasoning comments (could be dynamic)
+function renderReasoningComments() {
+  const comments = [
+    "The mapping includes a recent assessment document, covering all required units and demonstrating sufficiency.",
+    "Multiple sources of evidence were provided, which increases validity and authenticity.",
+    "Evidence is current and relevant, with recent workplace documentation.",
+    "Some gaps remain in workplace-specific examples; adding these would strengthen sufficiency.",
+    "Overall, the evidence meets the criteria for readiness for submission."
+  ];
+  const ul = document.getElementById('reasoningComments');
+  if (!ul) return;
+  ul.innerHTML = comments.map(c => `<li>${c}</li>`).join('');
+}
+
+// Download reasoning as PDF (simple text-based for demo)
+function downloadReasoningPDF() {
+  const comments = Array.from(document.querySelectorAll('#reasoningComments li')).map(li => "- " + li.textContent);
+  const pdfText = "AI Reasoning Summary\n\n" + comments.join("\n");
+  const blob = new Blob([pdfText], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "reasoning_summary.pdf";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+}
+
+document.getElementById('downloadReasoningPDFBtn')?.addEventListener('click', downloadReasoningPDF);
+window.addEventListener('load', renderReasoningComments);
 </script>
 </body>
 </html>
+
 
 
 
